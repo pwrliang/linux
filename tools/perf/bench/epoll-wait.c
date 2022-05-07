@@ -109,6 +109,9 @@ static bool multiq; /* use an epoll instance per thread */
 /* amount of fds to monitor, per thread */
 static unsigned int nfds = 64;
 
+/* sleep time in nano for writing thread */
+static unsigned int sleep_nano = 500;
+
 static pthread_mutex_t thread_lock;
 static unsigned int threads_starting;
 static struct stats throughput_stats;
@@ -127,6 +130,7 @@ static const struct option options[] = {
 	OPT_UINTEGER('t', "threads", &nthreads, "Specify amount of threads"),
 	OPT_UINTEGER('r', "runtime", &nsecs, "Specify runtime (in seconds)"),
 	OPT_UINTEGER('f', "nfds",    &nfds,  "Specify amount of file descriptors to monitor for each thread"),
+    OPT_UINTEGER('s', "sleep", &sleep_nano, "Specify sleep time in nano for wrting thread"),
 	OPT_BOOLEAN( 'n', "noaffinity",  &noaffinity,   "Disables CPU affinity"),
 	OPT_BOOLEAN('R', "randomize", &randomize,   "Enable random write behaviour (default is lineal)"),
 	OPT_BOOLEAN( 'v', "verbose", &__verbose, "Verbose mode"),
@@ -383,7 +387,7 @@ static void *writerfn(void *p)
 	const uint64_t val = 1;
 	ssize_t sz;
 	struct timespec ts = { .tv_sec = 0,
-			       .tv_nsec = 500 };
+			       .tv_nsec = sleep_nano };
 
 	printinfo("starting writer-thread: doing %s writes ...\n",
 		  randomize? "random":"lineal");
@@ -406,8 +410,9 @@ static void *writerfn(void *p)
 				} while (!wdone && (sz < 0 && errno == EAGAIN));
 			}
 		}
-
-		nanosleep(&ts, NULL);
+        if (sleep_nano > 0) {
+		    nanosleep(&ts, NULL);
+        }
 	}
 
 	printinfo("exiting writer-thread (total full-loops: %zd)\n", iter);
