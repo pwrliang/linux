@@ -209,7 +209,7 @@ static void *workerfn(void *arg)
 		 */
 		do {
 			ret = epoll_wait(efd, &ev, 1, to);
-		} while (ret < 0 && errno == EINTR);
+		} while ((ret < 0 && errno == EINTR) || ret == 0);
 		if (ret < 0)
 			err(EXIT_FAILURE, "epoll_wait");
 
@@ -235,7 +235,6 @@ static void *workerfn(void *arg)
 
 	if (multiq)
 		close(w->epollfd);
-
 	w->ops = ops;
 	return NULL;
 }
@@ -496,14 +495,13 @@ int bench_epoll_wait(int argc, const char **argv)
 
 	threads_starting = nthreads;
 
-	gettimeofday(&bench__start, NULL);
-
 	do_threads(worker, cpu);
 
 	pthread_mutex_lock(&thread_lock);
 	while (threads_starting)
 		pthread_cond_wait(&thread_parent, &thread_lock);
 	pthread_cond_broadcast(&thread_worker);
+    gettimeofday(&bench__start, NULL);
 	pthread_mutex_unlock(&thread_lock);
 
 	/*
