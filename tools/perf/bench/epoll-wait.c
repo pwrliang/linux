@@ -413,7 +413,9 @@ static void *writerfn(void *p)
 	end_tid = min_t(size_t, avg_nthreads * (writer->tid + 1), nthreads);
 
 	if (begin_tid == end_tid) {
-		err(EXIT_FAILURE, "Too many writers");
+		printinfo("exiting writer-thread %d (total full-loops: %zd)\n",
+			  writer->tid, iter);
+		return NULL;
 	}
 
 	printinfo(
