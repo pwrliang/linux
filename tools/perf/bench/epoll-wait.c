@@ -130,7 +130,7 @@ static const struct option options[] = {
 	OPT_UINTEGER('t', "threads", &nthreads, "Specify amount of threads"),
 	OPT_UINTEGER('r', "runtime", &nsecs, "Specify runtime (in seconds)"),
 	OPT_UINTEGER('f', "nfds",    &nfds,  "Specify amount of file descriptors to monitor for each thread"),
-    OPT_UINTEGER('s', "sleep", &sleep_nano, "Specify sleep time in nano for wrting thread"),
+    	OPT_UINTEGER('s', "sleep", &sleep_nano, "Specify sleep time in nano for wrting thread"),
 	OPT_BOOLEAN( 'n', "noaffinity",  &noaffinity,   "Disables CPU affinity"),
 	OPT_BOOLEAN('R', "randomize", &randomize,   "Enable random write behaviour (default is lineal)"),
 	OPT_BOOLEAN( 'v', "verbose", &__verbose, "Verbose mode"),
@@ -409,9 +409,9 @@ static void *writerfn(void *p)
 				} while (!wdone && (sz < 0 && errno == EAGAIN));
 			}
 		}
-        if (sleep_nano > 0) {
-		    nanosleep(&ts, NULL);
-        }
+		if (sleep_nano > 0) {
+		        nanosleep(&ts, NULL);
+		}
 	}
 
 	printinfo("exiting writer-thread (total full-loops: %zd)\n", iter);
